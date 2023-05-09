@@ -8,7 +8,7 @@ namespace MyCourse.Models
         public int QuizID { get; set; } = default!;
         public string Author { get; set; } = default!;
 
-        public ICollection<Question> Questions { get; set; } = new List<Question>();
+        public List<Question> Questions { get; } = new();
     }
 
     public class Question
@@ -18,7 +18,7 @@ namespace MyCourse.Models
         public string Text { get; set; } = default!;
         public Quiz Quiz { get; set; } = default!;
 
-        public ICollection<Answer> Answers { get; set; } = new List<Answer>();
+        public List<Answer> Answers { get; } = new();
     }
 
     public abstract class Answer
@@ -34,6 +34,6 @@ namespace MyCourse.Models
 
     public class ChoicesAnswer : Answer
     {
-        public ICollection<string> Choices { get; set; } = new List<string>();
+        public List<string> Choices { get; } = new();
     }
 }

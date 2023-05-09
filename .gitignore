@@ -94,6 +94,7 @@ ClientBin/
 ![Ss]tyle[Cc]op.targets
 ~$*
 *~
+*.db
 *.dbmdl
 *.[Pp]ublish.xml
 

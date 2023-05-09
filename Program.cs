@@ -12,7 +12,8 @@ var dbFolder = Environment.SpecialFolder.LocalApplicationData;
 var dbFolderPath = Environment.GetFolderPath(dbFolder);
 var dbPath = System.IO.Path.Join(dbFolderPath, dbFilename);
 
-builder.Services.AddDbContext<QuizContext>(options => options.UseSqlite($"Data Source={dbPath};Version=3;Password={dbPassword}"));
+// builder.Services.AddDbContext<QuizContext>(options => options.UseSqlite($"Data Source={dbPath};Password={dbPassword}"));
+builder.Services.AddDbContext<QuizContext>(options => options.UseSqlite($"Data Source={dbPath}"));
 
 // Add services to the container.
 builder.Services.AddRazorPages();
