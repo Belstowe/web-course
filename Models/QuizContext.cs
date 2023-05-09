@@ -6,7 +6,7 @@ namespace MyCourse.Models
     {
         public QuizContext(DbContextOptions<QuizContext> options) : base(options)
         {
-            Database.EnsureCreated();
+            // Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
