@@ -12,7 +12,12 @@ namespace MyCourse.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<VariableAnswer>();
-            modelBuilder.Entity<ChoicesAnswer>();
+            modelBuilder.Entity<ChoicesAnswer>()
+                        .Property(e => e.Choices)
+                        .HasConversion(
+                            v => string.Join(";;", v),
+                            v => v.Split(";;", StringSplitOptions.RemoveEmptyEntries).ToList()
+                        );
             base.OnModelCreating(modelBuilder);
         }
 

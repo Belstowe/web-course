@@ -34,6 +34,6 @@ namespace MyCourse.Models
 
     public class ChoicesAnswer : Answer
     {
-        public List<string> Choices { get; } = new();
+        public List<string> Choices { get; set; } = new();
     }
 }
