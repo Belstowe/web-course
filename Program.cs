@@ -17,6 +17,7 @@ builder.Services.AddDbContext<QuizContext>(options => options.UseSqlite($"Data S
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddScoped<IQuizService, EFQuizService>();
 
 var app = builder.Build();
 

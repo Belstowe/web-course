@@ -1,7 +1,28 @@
 ﻿@page "/"
+@inject IQuizService QuizService
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Главная страница</PageTitle>
 
-<h1>Hello, world!</h1>
+@if (QuizService.GetQuizzes().Count() > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Название</th>
+                <th scope="col">Автор</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var quiz in QuizService.GetQuizzes())
+            {
+                   <td>@quiz.Name</td>
+                   <td>@quiz.Author</td>
+            }
+        </tbody>
+    </table>
+} else {
+    <p>На данный момент никаких опросов нет.</p>
+    <p>Ты можешь сделать первый!</p>
+}
 
-Welcome to your new app.
+<a href="/CreateQuiz" class="btn btn-primary" role="button">Создать опрос</a>

@@ -4,16 +4,16 @@ namespace MyCourse.Models
     {
         private static int quizCounter = 0;
         private static int questionCounter = 0;
-        private readonly QuizContext ctx;
+        private readonly QuizContext _context;
 
         public EFQuizService(QuizContext ctx)
         {
-            this.ctx = ctx;
+            this._context = ctx;
         }
 
         public int? AddVariableQuestion(Quiz quiz, string text, string hint = "")
         {
-            var entry = ctx.Questions.Add(new VariableQuestion{
+            var entry = _context.Questions.Add(new VariableQuestion{
                 QuestionID = ++questionCounter,
                 Quiz = quiz,
                 QuizRefID = quiz.QuizID,
@@ -29,7 +29,7 @@ namespace MyCourse.Models
         
         public int? AddChoicesQuestion(Quiz quiz, string text, IEnumerable<string> choices)
         {
-            var entry = ctx.Questions.Add(new ChoicesQuestion{
+            var entry = _context.Questions.Add(new ChoicesQuestion{
                 QuestionID = ++questionCounter,
                 Quiz = quiz,
                 QuizRefID = quiz.QuizID,
@@ -45,7 +45,7 @@ namespace MyCourse.Models
 
         public int? CreateQuiz(string name, string author)
         {
-            var entry = ctx.Quizzes.Add(new Quiz{
+            var entry = _context.Quizzes.Add(new Quiz{
                 QuizID = ++quizCounter,
                 Name = name,
                 Author = author
@@ -57,34 +57,44 @@ namespace MyCourse.Models
             return quizCounter;
         }
 
-        public bool DeleteQuestion(int questionID)
+        public bool DeleteQuiz(int id)
         {
-            var question = ctx.Questions.First(question => question.QuestionID == questionID);
+            var quiz = _context.Quizzes.Find(id);
+            if (quiz is null) {
+                return false;
+            }
+            _context.Quizzes.Remove(quiz);
+            return true;
+        }
+
+        public bool DeleteQuestion(int id)
+        {
+            var question = _context.Questions.Find(id);
             if (question is null) {
                 return false;
             }
-            ctx.Remove(question);
+            _context.Questions.Remove(question);
             return true;
         }
 
         public Question? GetQuestion(int id)
         {
-            return ctx.Questions.Find(id);
+            return _context.Questions.Find(id);
         }
 
         public IEnumerable<Question> GetQuestions(int quizID)
         {
-            return ctx.Questions.Where(question => question.QuizRefID == quizID).AsEnumerable();
+            return _context.Questions.Where(question => question.QuizRefID == quizID).AsEnumerable();
         }
 
         public Quiz? GetQuiz(int id)
         {
-            return ctx.Quizzes.Find(id);
+            return _context.Quizzes.Find(id);
         }
 
         public IEnumerable<Quiz> GetQuizzes()
         {
-            return ctx.Quizzes.AsEnumerable();
+            return _context.Quizzes.AsEnumerable();
         }
     }
 }
