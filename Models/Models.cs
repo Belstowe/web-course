@@ -6,33 +6,26 @@ namespace MyCourse.Models
     {
         [Key]
         public int QuizID { get; set; } = default!;
+        public DateTime DateCreated { get; set; } = DateTime.Now;
         public string Author { get; set; } = default!;
 
         public List<Question> Questions { get; } = new();
     }
 
-    public class Question
+    public abstract class Question
     {
         [Key]
         public int QuestionID { get; set; }
         public string Text { get; set; } = default!;
         public Quiz Quiz { get; set; } = default!;
-
-        public List<Answer> Answers { get; } = new();
     }
 
-    public abstract class Answer
-    {
-        public int AnswerID { get; set; }
-        public Question Question { get; set; } = default!;
-    }
-
-    public class VariableAnswer : Answer
+    public class VariableQuestion : Question
     {
         public string Hint { get; set; } = default!;
     }
 
-    public class ChoicesAnswer : Answer
+    public class ChoicesQuestion : Question
     {
         public List<string> Choices { get; set; } = new();
     }
