@@ -32,6 +32,6 @@ namespace MyCourse.Models
 
     public class ChoicesQuestion : Question
     {
-        public List<string> Choices { get; set; } = new();
+        public IEnumerable<string> Choices { get; set; } = default!;
     }
 }
