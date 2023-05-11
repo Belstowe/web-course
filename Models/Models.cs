@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyCourse.Models
 {
@@ -8,6 +9,7 @@ namespace MyCourse.Models
         public int QuizID { get; set; } = default!;
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public string Author { get; set; } = default!;
+        public string Name { get; set; } = default!;
 
         public List<Question> Questions { get; } = new();
     }
@@ -17,6 +19,9 @@ namespace MyCourse.Models
         [Key]
         public int QuestionID { get; set; }
         public string Text { get; set; } = default!;
+
+        [ForeignKey("Quiz")]
+        public int QuizRefID { get; set; }
         public Quiz Quiz { get; set; } = default!;
     }
 
