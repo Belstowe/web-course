@@ -39,7 +39,7 @@
                     {
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
-                                <button class="btn btn-danger" type="button" @onclick="() => choicesRow.DeleteChoice(choiceElement.Index)">X</button>
+                                <button class="btn btn-danger" type="button" @onclick="() => choicesRow.DeleteChoice(choiceElement.Index)">🗙</button>
                             </div>
                             <input type="text" class="form-control" placeholder=@($"Вариант ответа #{choiceElement.Index + 1}") value="@choiceElement.Text" @onchange='@(e => choicesRow.ChangeChoice(choiceElement.Index, e.Value?.ToString() ?? ""))' required />
                         </div>
