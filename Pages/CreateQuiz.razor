@@ -1,5 +1,7 @@
 @page "/CreateQuiz"
 @inject IQuizService QuizService
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavManager
 
 <PageTitle>Создаём опрос</PageTitle>
 
@@ -55,34 +57,38 @@
 </ul>
 
 <br />
-<button type="button" class="btn btn-primary btn-lg btn-block" @onclick="addQuiz" disabled="@quizDisableSend()">Опубликовать</button>
+<button type="button" class="btn btn-primary btn-lg btn-block" @onclick="submitQuiz" disabled="@quizDisableSend()">Опубликовать</button>
 
 @code {
     string QuizName = "";
     string QuizAuthor = "";
     List<QuestionRow> Questions = new();
 
-    void addQuiz()
+    async void submitQuiz()
+    {
+        string promptText = addQuizToDB();
+        await JsRuntime.InvokeVoidAsync("alert", promptText);
+        NavManager.NavigateTo("/");
+    }
+
+    string addQuizToDB()
     {
         int? quizID = QuizService.CreateQuiz(QuizName, QuizAuthor);
         if (quizID == null) {
-            //return "Couldn't successfully add Quiz to DB!";
-            return;
+            return "Ошибка с добавлением опроса в БД.";
         }
         Quiz? quiz = QuizService.GetQuiz(quizID.Value);
         if (quiz == null) {
-            //return "Couldn't successfully retrive Quiz by id!";
-            return;
+            return "Ошибка с извлечением опроса по ID из БД.";
         }
         foreach (var question in Questions) {
             int? questionID = question.Add(quiz);
             if (questionID == null) {
-                //return "Couldn't successfully add Question to DB!";
-                return;
+                return "Ошибка с добавлением одного из вопросов в БД.";
             }
         }
         QuizService.SaveChanges();
-        //return "";
+        return "Ваш опрос успешно добавлен!";
     }
 
     void addChoicesQuestion()

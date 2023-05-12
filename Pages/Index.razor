@@ -17,8 +17,10 @@
         <tbody>
             @foreach (var quiz in QuizService.GetQuizzes())
             {
+                <tr>
                    <td><a href=@($"/PassQuiz/{quiz.QuizID}")>@quiz.Name</a></td>
                    <td>@quiz.Author</td>
+                </tr>
             }
         </tbody>
     </table>
