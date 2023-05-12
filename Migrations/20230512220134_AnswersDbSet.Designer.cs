@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyCourse.Models;
 
@@ -10,9 +11,11 @@ using MyCourse.Models;
 namespace MyCourse.Migrations
 {
     [DbContext(typeof(QuizContext))]
-    partial class QuizContextModelSnapshot : ModelSnapshot
+    [Migration("20230512220134_AnswersDbSet")]
+    partial class AnswersDbSet
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
@@ -23,9 +26,6 @@ namespace MyCourse.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("AnswerSpree")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Discriminator")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -34,8 +34,6 @@ namespace MyCourse.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("AnswerID");
-
-                    b.HasIndex("AnswerSpree");
 
                     b.HasIndex("QuestionRefID");
 

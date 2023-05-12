@@ -1,4 +1,4 @@
-@page "/PassQuiz/{Id:int}"
+@page "/PassQuiz/{QuizId:int}"
 @inject IQuizService QuizService
 
 @if (Questions == null) {
@@ -13,14 +13,28 @@
         @switch (questionItem.Item)
         {
             case ChoicesQuestion choicesQuestion:
+                var choicesAnswer = Answers[questionItem.Index] as ChoicesAnswerRow;
                 @foreach (var choiceItem in choicesQuestion.Choices.Select((it, i) => new { Item = it, Index = i }))
                 {
                     <div class="form-check">
-                        <input class="form-check-input"
-                            type=@(choicesQuestion.AllowMultipleChoices ? "checkbox" : "radio")
-                            value=""
-                            name=@($"choice-{questionItem.Index}")
-                            id=@($"choice-{questionItem.Index}-{choiceItem.Index}") />
+                        @if (choicesQuestion.AllowMultipleChoices)
+                        {
+                            <input class="form-check-input"
+                                type="checkbox"
+                                value=""
+                                checked="@(choicesAnswer!.AnswerChecked[choiceItem.Index])"
+                                name=@($"choice-{questionItem.Index}")
+                                id=@($"choice-{questionItem.Index}-{choiceItem.Index}")
+                                @onchange="@(eventArgs => { choicesAnswer!.AnswerChecked[choiceItem.Index] = (bool)eventArgs.Value!; } )" />
+                        } else {
+                            <input class="form-check-input"
+                                type="radio"
+                                value=""
+                                checked="@(choicesAnswer!.AnswerChecked[choiceItem.Index])"
+                                name=@($"choice-{questionItem.Index}")
+                                id=@($"choice-{questionItem.Index}-{choiceItem.Index}")
+                                @onchange="@(() => { choicesAnswer!.Clear(); choicesAnswer!.AnswerChecked[choiceItem.Index] = true; } )" />
+                        }
                         <label class="form-check-label"
                             for=@($"choice-{questionItem.Index}-{choiceItem.Index}")>
                             @choiceItem.Item
@@ -29,21 +43,85 @@
                 }
                 break;
             case VariableQuestion variableQuestion:
-                <input type="text" class="form-control" placeholder="@variableQuestion.Hint" />
+                var variableAnswer = Answers[questionItem.Index] as VariableAnswerRow;
+                <input type="text" class="form-control" placeholder="@variableQuestion.Hint" @bind="variableAnswer!.Input" />
                 break;
         }
         <hr />
     }
+    <button type="button" class="btn btn-primary btn-lg btn-block" @onclick="addAnswer">Опубликовать</button>
 }
 
 @code {
     [Parameter]
-    public int Id { get; set; }
+    public int QuizId { get; set; }
+    public Guid AnswerSpree { get; } = Guid.NewGuid();
     public IEnumerable<Question>? Questions { get; set; }
+    public IList<AnswerRow> Answers { get; set; } = new List<AnswerRow>();
 
     protected override void OnParametersSet()
     {
-        Questions = QuizService.GetQuestions(Id);
+        Questions = QuizService.GetQuestions(QuizId);
         base.OnParametersSet();
+        foreach (var question in Questions) {
+            switch (question) {
+                case ChoicesQuestion choicesQuestion:
+                    Answers.Add(new ChoicesAnswerRow(QuizService, choicesQuestion.Choices.Count()));
+                    break;
+                case VariableQuestion variableQuestion:
+                    Answers.Add(new VariableAnswerRow(QuizService));
+                    break;
+            }
+        }
+    }
+
+    void addAnswer()
+    {
+        var answersSet = Answers.Zip(Questions!);
+        foreach (var answerSet in answersSet)
+        {
+            switch (answerSet.First) {
+                case ChoicesAnswerRow choicesAnswer:
+                    QuizService.AddChoicesAnswer(AnswerSpree, answerSet.Second, choicesAnswer.AnswerChecked);
+                    break;
+                case VariableAnswerRow variableAnswer:
+                    QuizService.AddVariableAnswer(AnswerSpree, answerSet.Second, variableAnswer.Input);
+                    break;
+            }
+        }
+        QuizService.SaveChanges();
+    }
+
+    public interface AnswerRow {}
+
+    public class ChoicesAnswerRow : AnswerRow
+    {
+        IQuizService _service;
+        public List<bool> AnswerChecked { get; set; }
+        public ChoicesAnswerRow(IQuizService service, int size)
+        {
+            _service = service;
+            AnswerChecked = new();
+            for (int i = 0; i < size; i++) {
+                AnswerChecked.Add(false);
+            }
+        }
+        public void Clear()
+        {
+            for (int i = 0; i < AnswerChecked.Count; i++) {
+                AnswerChecked[i] = false;
+            }
+        }
+    }
+
+    public class VariableAnswerRow : AnswerRow
+    {
+        IQuizService _service;
+        public string Input { get; set; }
+        public VariableAnswerRow(IQuizService service)
+        {
+            _service = service;
+            Input = "";
+        }
     }
 }

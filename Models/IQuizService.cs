@@ -11,6 +11,10 @@ namespace MyCourse.Models
         Question? GetQuestion(int id);
         IEnumerable<Question> GetQuestions(int quizID);
         bool DeleteQuestion(int id);
+        int? AddVariableAnswer(Guid answerSpree, Question question, string text);
+        int? AddChoicesAnswer(Guid answerSpree, Question question, IEnumerable<bool> checkedAnswers);
+        Answer? GetAnswer(int id);
+        IEnumerable<Answer> GetAnswers(Guid answerSpree);
         void SaveChanges();
     }
 }

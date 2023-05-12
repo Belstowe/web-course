@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyCourse.Models;
 
@@ -10,23 +11,22 @@ using MyCourse.Models;
 namespace MyCourse.Migrations
 {
     [DbContext(typeof(QuizContext))]
-    partial class QuizContextModelSnapshot : ModelSnapshot
+    [Migration("20230512220053_AnswersModel")]
+    partial class AnswersModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
 
-            modelBuilder.Entity("MyCourse.Models.Answer", b =>
+            modelBuilder.Entity("MyCourse.Models.ChoicesAnswer", b =>
                 {
                     b.Property<int>("AnswerID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("AnswerSpree")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Discriminator")
+                    b.Property<string>("Choices")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -35,15 +35,9 @@ namespace MyCourse.Migrations
 
                     b.HasKey("AnswerID");
 
-                    b.HasIndex("AnswerSpree");
-
                     b.HasIndex("QuestionRefID");
 
-                    b.ToTable("Answers");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Answer");
-
-                    b.UseTphMappingStrategy();
+                    b.ToTable("ChoicesAnswer");
                 });
 
             modelBuilder.Entity("MyCourse.Models.Question", b =>
@@ -96,26 +90,24 @@ namespace MyCourse.Migrations
                     b.ToTable("Quizzes");
                 });
 
-            modelBuilder.Entity("MyCourse.Models.ChoicesAnswer", b =>
-                {
-                    b.HasBaseType("MyCourse.Models.Answer");
-
-                    b.Property<string>("Choices")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasDiscriminator().HasValue("ChoicesAnswer");
-                });
-
             modelBuilder.Entity("MyCourse.Models.VariableAnswer", b =>
                 {
-                    b.HasBaseType("MyCourse.Models.Answer");
+                    b.Property<int>("AnswerID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Input")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasDiscriminator().HasValue("VariableAnswer");
+                    b.Property<int>("QuestionRefID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("AnswerID");
+
+                    b.HasIndex("QuestionRefID");
+
+                    b.ToTable("VariableAnswer");
                 });
 
             modelBuilder.Entity("MyCourse.Models.ChoicesQuestion", b =>
@@ -143,7 +135,7 @@ namespace MyCourse.Migrations
                     b.HasDiscriminator().HasValue("VariableQuestion");
                 });
 
-            modelBuilder.Entity("MyCourse.Models.Answer", b =>
+            modelBuilder.Entity("MyCourse.Models.ChoicesAnswer", b =>
                 {
                     b.HasOne("MyCourse.Models.Question", "Question")
                         .WithMany()
@@ -163,6 +155,17 @@ namespace MyCourse.Migrations
                         .IsRequired();
 
                     b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("MyCourse.Models.VariableAnswer", b =>
+                {
+                    b.HasOne("MyCourse.Models.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionRefID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("MyCourse.Models.Quiz", b =>

@@ -2,13 +2,17 @@ namespace MyCourse.Models
 {
     public sealed class EFQuizService : IQuizService
     {
-        private static int quizCounter = 0;
-        private static int questionCounter = 0;
+        private static int quizCounter;
+        private static int questionCounter;
+        private static int answerCounter;
         private readonly QuizContext _context;
 
         public EFQuizService(QuizContext ctx)
         {
             this._context = ctx;
+            quizCounter = ctx.Quizzes.Select(q => q.QuizID).AsEnumerable().DefaultIfEmpty(0).Max();
+            questionCounter = ctx.Questions.Select(q => q.QuestionID).AsEnumerable().DefaultIfEmpty(0).Max();
+            answerCounter = ctx.Answers.Select(a => a.AnswerID).AsEnumerable().DefaultIfEmpty(0).Max();
         }
 
         public int? AddVariableQuestion(Quiz quiz, string text, string hint = "")
@@ -103,6 +107,52 @@ namespace MyCourse.Models
         public void SaveChanges()
         {
             _context.SaveChanges();
+        }
+
+        int? IQuizService.AddVariableAnswer(Guid answerSpree, Question question, string text)
+        {
+            var entry = _context.Answers.Add(new VariableAnswer{
+                AnswerID = ++answerCounter,
+                AnswerSpree = answerSpree,
+                QuestionRefID = question.QuestionID,
+                Question = question,
+                Input = text
+            });
+            if (entry is null) {
+                --answerCounter;
+                return null;
+            }
+            return answerCounter;
+        }
+
+        int? IQuizService.AddChoicesAnswer(Guid answerSpree, Question question, IEnumerable<bool> checkedAnswers)
+        {
+            var answerIndexes = checkedAnswers.Select((c, i) => new { Item = c, Index = i } )
+                                              .Where(item => item.Item == true)
+                                              .Select(item => item.Index)
+                                              .AsEnumerable();
+            var entry = _context.Answers.Add(new ChoicesAnswer{
+                AnswerID = ++answerCounter,
+                AnswerSpree = answerSpree,
+                QuestionRefID = question.QuestionID,
+                Question = question,
+                Choices = answerIndexes
+            });
+            if (entry is null) {
+                --answerCounter;
+                return null;
+            }
+            return answerCounter;
+        }
+
+        Answer? IQuizService.GetAnswer(int id)
+        {
+            return _context.Answers.Find(id);
+        }
+
+        IEnumerable<Answer> IQuizService.GetAnswers(Guid answerSpree)
+        {
+            return _context.Answers.Where(answer => answer.AnswerSpree == answerSpree).AsEnumerable();
         }
     }
 }

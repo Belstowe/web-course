@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyCourse.Models
 {
@@ -34,5 +35,27 @@ namespace MyCourse.Models
     {
         public IEnumerable<string> Choices { get; set; } = default!;
         public bool AllowMultipleChoices { get; set; } = false;
+    }
+
+    [Index(nameof(AnswerSpree), IsUnique = false)]
+    public abstract class Answer
+    {
+        [Key]
+        public int AnswerID { get; set; }
+        public Guid AnswerSpree { get; set; }
+
+        [ForeignKey("Question")]
+        public int QuestionRefID { get; set; }
+        public Question Question { get; set; } = default!;
+    }
+
+    public class VariableAnswer : Answer
+    {
+        public string Input { get; set; } = default!;
+    }
+
+    public class ChoicesAnswer : Answer
+    {
+        public IEnumerable<int> Choices { get; set; } = default!;
     }
 }
