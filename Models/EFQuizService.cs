@@ -65,6 +65,8 @@ namespace MyCourse.Models
                 return false;
             }
             _context.Quizzes.Remove(quiz);
+            var questions = _context.Questions.Where(question => question.QuizRefID == id);
+            _context.Questions.RemoveRange(questions);
             return true;
         }
 

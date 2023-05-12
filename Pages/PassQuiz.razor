@@ -1,0 +1,49 @@
+@page "/PassQuiz/{Id:int}"
+@inject IQuizService QuizService
+
+@if (Questions == null) {
+    <p>Пожалуйста, подождите...</p>
+} else if (Questions.Count() == 0) {
+    <p>Не нашли ваш опрос. Он точно существует?</p>
+} else {
+    @foreach (var questionItem in Questions.Select((it, i) => new { Item = it, Index = i }))
+    {
+        <h2>Вопрос #@(questionItem.Index + 1)</h2>
+        <p>@questionItem.Item.Text</p>
+        @switch (questionItem.Item)
+        {
+            case ChoicesQuestion choicesQuestion:
+                @foreach (var choiceItem in choicesQuestion.Choices.Select((it, i) => new { Item = it, Index = i }))
+                {
+                    <div class="form-check">
+                        <input class="form-check-input"
+                            type=@(choicesQuestion.AllowMultipleChoices ? "checkbox" : "radio")
+                            value=""
+                            name=@($"choice-{questionItem.Index}")
+                            id=@($"choice-{questionItem.Index}-{choiceItem.Index}") />
+                        <label class="form-check-label"
+                            for=@($"choice-{questionItem.Index}-{choiceItem.Index}")>
+                            @choiceItem.Item
+                        </label>
+                    </div>
+                }
+                break;
+            case VariableQuestion variableQuestion:
+                <input type="text" class="form-control" placeholder="@variableQuestion.Hint" />
+                break;
+        }
+        <hr />
+    }
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public IEnumerable<Question>? Questions { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Questions = QuizService.GetQuestions(Id);
+        base.OnParametersSet();
+    }
+}

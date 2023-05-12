@@ -17,7 +17,7 @@
         <tbody>
             @foreach (var quiz in QuizService.GetQuizzes())
             {
-                   <td>@quiz.Name</td>
+                   <td><a href=@($"/PassQuiz/{quiz.QuizID}")>@quiz.Name</a></td>
                    <td>@quiz.Author</td>
             }
         </tbody>
