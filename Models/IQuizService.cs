@@ -11,5 +11,6 @@ namespace MyCourse.Models
         Question? GetQuestion(int id);
         IEnumerable<Question> GetQuestions(int quizID);
         bool DeleteQuestion(int id);
+        void SaveChanges();
     }
 }

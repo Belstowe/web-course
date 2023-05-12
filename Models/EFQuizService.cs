@@ -96,5 +96,10 @@ namespace MyCourse.Models
         {
             return _context.Quizzes.AsEnumerable();
         }
+
+        public void SaveChanges()
+        {
+            _context.SaveChanges();
+        }
     }
 }

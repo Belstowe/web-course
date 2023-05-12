@@ -3,7 +3,181 @@
 
 <PageTitle>Создаём опрос</PageTitle>
 
+<div class="input-group mb-3">
+    <input type="text" class="form-control" @bind="QuizAuthor" placeholder="Автор" required />
+</div>
+
+<div class="input-group mb-3">
+    <input type="text" class="form-control" @bind="QuizName" placeholder="Название опроса" required />
+</div>
+
+<div>
+    <button type="button" class="btn btn-primary" @onclick="addChoicesQuestion">Добавить вопрос с выбором</button>
+    <button type="button" class="btn btn-primary" @onclick="addVariableQuestion">Добавить вопрос с произвольным вводом</button>
+</div>
+
+<ul class="list-group">
+    @foreach (var questionRow in Questions)
+    {
+        <li class="list-group-item">
+            <button @onclick="() => removeQuestion(questionRow)" class="btn btn-danger">Удалить</button>
+            @switch(questionRow)
+            {
+                case ChoicesQuestionRow choicesRow:
+                    <input type="text" class="form-control" placeholder="Текст вопроса" @bind="choicesRow.QuestionText" required />
+                    <button type="button" class="btn btn-secondary" @onclick="choicesRow.AppendChoice">Добавить вариант ответа</button>
+                    <p>Варианты ответа:</p>
+                    @foreach (var choiceElement in choicesRow.Choices.Select((t, i) => new { Text = t, Index = i } ))
+                    {
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-danger" type="button" @onclick="() => choicesRow.DeleteChoice(choiceElement.Index)">X</button>
+                            </div>
+                            <input type="text" class="form-control" placeholder=@($"Вариант ответа #{choiceElement.Index + 1}") value="@choiceElement.Text" @onchange='@(e => choicesRow.ChangeChoice(choiceElement.Index, e.Value?.ToString() ?? ""))' required />
+                        </div>
+                    }
+                    break;
+
+                case VariableQuestionRow variableRow:
+                    <input type="text" class="form-control" placeholder="Текст вопроса" @bind="variableRow.QuestionText" required />
+                    <input type="text" class="form-control" placeholder="Подсказка" @bind="variableRow.Hint" />
+                    break;
+            }
+            <hr />
+        </li>
+    }
+</ul>
+
+<br />
+<button type="button" class="btn btn-primary btn-lg btn-block" @onclick="addQuiz" disabled="@quizDisableSend()">Опубликовать</button>
+
 @code {
     string QuizName = "";
     string QuizAuthor = "";
+    List<QuestionRow> Questions = new();
+
+    void addQuiz()
+    {
+        int? quizID = QuizService.CreateQuiz(QuizName, QuizAuthor);
+        if (quizID == null) {
+            //return "Couldn't successfully add Quiz to DB!";
+            return;
+        }
+        Quiz? quiz = QuizService.GetQuiz(quizID.Value);
+        if (quiz == null) {
+            //return "Couldn't successfully retrive Quiz by id!";
+            return;
+        }
+        foreach (var question in Questions) {
+            int? questionID = question.Add(quiz);
+            if (questionID == null) {
+                //return "Couldn't successfully add Question to DB!";
+                return;
+            }
+        }
+        QuizService.SaveChanges();
+        //return "";
+    }
+
+    void addChoicesQuestion()
+    {
+        Questions.Add(new ChoicesQuestionRow(QuizService));
+    }
+
+    void addVariableQuestion()
+    {
+        Questions.Add(new VariableQuestionRow(QuizService));
+    }
+
+    void removeQuestion(QuestionRow row)
+    {
+        Questions.Remove(row);
+    }
+
+    bool quizEnableSend()
+    {
+        return (Questions.Count > 0) &&
+               (QuizName.Count() > 0) &&
+               (QuizAuthor.Count() > 0) &&
+               Questions.All(q => q.IsFilled());
+    }
+
+    bool quizDisableSend()
+    {
+        return !quizEnableSend();
+    }
+
+    public interface QuestionRow
+    {
+        int? Add(Quiz quiz);
+        bool IsFilled();
+    }
+
+    public sealed class ChoicesQuestionRow : QuestionRow
+    {
+        IQuizService _service;
+        public string QuestionText { get; set; }
+        public List<string> Choices;
+
+        public ChoicesQuestionRow(IQuizService service)
+        {
+            _service = service;
+            QuestionText = "";
+            Choices = new();
+        }
+
+        public int? Add(Quiz quiz)
+        {
+            return _service.AddChoicesQuestion(quiz, QuestionText, Choices);
+        }
+
+        public bool IsFilled()
+        {
+            return (Choices.Count > 0) && (QuestionText.Count() > 0) && Choices.All(q => q.Count() > 0);
+        }
+
+        public void AppendChoice()
+        {
+            Choices.Add("");
+        }
+
+        public void ChangeChoice(int pos, string text)
+        {
+            Choices[pos] = text;
+        }
+
+        public void DeleteChoice(int pos)
+        {
+            Choices.RemoveAt(pos);
+        }
+
+        public void ChangeText(string text)
+        {
+            QuestionText = text;
+        }
+    }
+
+    public sealed class VariableQuestionRow : QuestionRow
+    {
+        IQuizService _service;
+        public string QuestionText { get; set; }
+        public string Hint { get; set; }
+
+        public VariableQuestionRow(IQuizService service)
+        {
+            _service = service;
+            QuestionText = "";
+            Hint = "";
+        }
+
+        public int? Add(Quiz quiz)
+        {
+            return _service.AddVariableQuestion(quiz, QuestionText, Hint);
+        }
+
+        public bool IsFilled()
+        {
+            return QuestionText.Count() > 0;
+        }
+    }
 }
