@@ -25,6 +25,12 @@
             {
                 case ChoicesQuestionRow choicesRow:
                     <input type="text" class="form-control" placeholder="Текст вопроса" @bind="choicesRow.QuestionText" required />
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" @bind="choicesRow.AllowMultipleChoices">
+                        <label class="form-check-label">
+                            Разрешить множественный выбор
+                        </label>
+                    </div>
                     <button type="button" class="btn btn-secondary" @onclick="choicesRow.AppendChoice">Добавить вариант ответа</button>
                     <p>Варианты ответа:</p>
                     @foreach (var choiceElement in choicesRow.Choices.Select((t, i) => new { Text = t, Index = i } ))
@@ -118,6 +124,7 @@
         IQuizService _service;
         public string QuestionText { get; set; }
         public List<string> Choices;
+        public bool AllowMultipleChoices { get; set; } = false;
 
         public ChoicesQuestionRow(IQuizService service)
         {

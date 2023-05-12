@@ -33,5 +33,6 @@ namespace MyCourse.Models
     public class ChoicesQuestion : Question
     {
         public IEnumerable<string> Choices { get; set; } = default!;
+        public bool AllowMultipleChoices { get; set; } = false;
     }
 }

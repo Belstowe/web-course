@@ -7,7 +7,7 @@ namespace MyCourse.Models
         IEnumerable<Quiz> GetQuizzes();
         bool DeleteQuiz(int id);
         int? AddVariableQuestion(Quiz quiz, string text, string hint = "");
-        int? AddChoicesQuestion(Quiz quiz, string text, IEnumerable<string> choices);
+        int? AddChoicesQuestion(Quiz quiz, string text, IEnumerable<string> choices, bool allowMultipleChoices = false);
         Question? GetQuestion(int id);
         IEnumerable<Question> GetQuestions(int quizID);
         bool DeleteQuestion(int id);

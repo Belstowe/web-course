@@ -27,14 +27,15 @@ namespace MyCourse.Models
             return questionCounter;
         }
         
-        public int? AddChoicesQuestion(Quiz quiz, string text, IEnumerable<string> choices)
+        public int? AddChoicesQuestion(Quiz quiz, string text, IEnumerable<string> choices, bool allowMultipleChoices = false)
         {
             var entry = _context.Questions.Add(new ChoicesQuestion{
                 QuestionID = ++questionCounter,
                 Quiz = quiz,
                 QuizRefID = quiz.QuizID,
                 Text = text,
-                Choices = choices
+                Choices = choices,
+                AllowMultipleChoices = allowMultipleChoices
             });
             if (entry is null) {
                 --questionCounter;
