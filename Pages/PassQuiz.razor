@@ -1,5 +1,7 @@
 @page "/PassQuiz/{QuizId:int}"
 @inject IQuizService QuizService
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavManager
 
 @if (Questions == null) {
     <p>Пожалуйста, подождите...</p>
@@ -49,7 +51,7 @@
         }
         <hr />
     }
-    <button type="button" class="btn btn-primary btn-lg btn-block" @onclick="addAnswer">Опубликовать</button>
+    <button type="button" class="btn btn-primary btn-lg btn-block" @onclick="submitAnswer">Опубликовать</button>
 }
 
 @code {
@@ -75,21 +77,33 @@
         }
     }
 
-    void addAnswer()
+    async void submitAnswer()
+    {
+        string promptText = addAnswerToDB();
+        await JsRuntime.InvokeVoidAsync("alert", promptText);
+        NavManager.NavigateTo("/");
+    }
+
+    string addAnswerToDB()
     {
         var answersSet = Answers.Zip(Questions!);
         foreach (var answerSet in answersSet)
         {
+            int? answerId = null;
             switch (answerSet.First) {
                 case ChoicesAnswerRow choicesAnswer:
-                    QuizService.AddChoicesAnswer(AnswerSpree, answerSet.Second, choicesAnswer.AnswerChecked);
+                    answerId = QuizService.AddChoicesAnswer(AnswerSpree, answerSet.Second, choicesAnswer.AnswerChecked);
                     break;
                 case VariableAnswerRow variableAnswer:
-                    QuizService.AddVariableAnswer(AnswerSpree, answerSet.Second, variableAnswer.Input);
+                    answerId = QuizService.AddVariableAnswer(AnswerSpree, answerSet.Second, variableAnswer.Input);
                     break;
+            }
+            if (answerId == null) {
+                return "Не получилось добавить ваш ответ в БД.";
             }
         }
         QuizService.SaveChanges();
+        return "Успешно добавили Ваш ответ!";
     }
 
     public interface AnswerRow {}
